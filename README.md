@@ -14,9 +14,22 @@ python -m http.server 8000
 
 Ouvre ensuite <http://localhost:8000>. Cela sert uniquement à prévisualiser le calendrier sur ton appareil; les adresses `localhost` ne sont pas accessibles à tes proches. Il n'y a ni dépendance à installer ni compte à créer.
 
-### Publier pour partager les liens
+### Page publique
 
-Après avoir intégré ces fichiers à `main`, active **Settings → Pages → Build and deployment → Source → GitHub Actions** dans le dépôt, puis lance l'action **Advent calendar Pages** dans l'onglet **Actions** (ou pousse une modification du calendrier sur `main`). Cela publie la page à <https://rehan-remade.github.io/universal-modder/>. Crée le lien partagé depuis cette adresse publique; un lien créé depuis l'aperçu local ne peut pas fonctionner sur l'appareil d'un destinataire.
+La version actuellement publiée est accessible à <https://jeanchales13-beep.github.io/universal-modder/>. Ouvre cette adresse pour créer un lien que tes proches pourront consulter. Le lien est construit depuis cette URL publique et contient une copie du calendrier; chaque destinataire voit les surprises en lecture seule.
+
+Cette page est une publication sur le fork de développement. Pour publier la version du dépôt source, intègre les fichiers à `main`, active **Settings → Pages → Build and deployment → Source → GitHub Actions** dans le dépôt source, puis lance l'action **Advent calendar Pages** dans l'onglet **Actions**. Elle sera alors publiée à <https://rehan-remade.github.io/universal-modder/>. Les liens créés depuis `localhost` ou `file://` sont refusés, car ils ne seraient pas accessibles aux destinataires.
+
+### Activer les comptes créateur
+
+Les comptes et leur sauvegarde en ligne utilisent Supabase; le projet doit être configuré par son propriétaire avant de pouvoir créer de vrais comptes.
+
+1. Crée un projet Supabase, puis exécute le contenu de `supabase-schema.sql` dans son **SQL Editor**. La table et ses règles de sécurité garantissent qu'un compte ne possède qu'un seul calendrier et que seuls ses propriétaires peuvent le consulter ou le modifier.
+2. Dans les paramètres API du projet Supabase, copie l'URL du projet et sa clé **publishable** (ou l'ancienne clé **anon/public**). Active **Email** dans les fournisseurs d'authentification Supabase; si la confirmation des nouveaux comptes est activée, configure l'envoi de courriels dans Supabase.
+3. Remplace `url` et `anonKey` dans `account-config.js`, puis publie de nouveau le dossier du calendrier. Ces valeurs sont des identifiants publics utilisables dans un navigateur; n'y mets jamais la clé `service_role` ou une clé secrète.
+4. La personne créatrice choisit **Mon compte**, puis **Créer mon compte**. Si la confirmation de courriel est activée dans Supabase, elle confirme son adresse avant de se connecter. À sa première connexion, le brouillon local devient son unique calendrier en ligne; un calendrier déjà enregistré pour ce compte remplace le brouillon local.
+
+Sans URL et clé Supabase valides dans `account-config.js`, l'application indique que les comptes doivent être configurés; la création d'un compte ne peut pas fonctionner. Ne partage pas la clé `service_role`, même si l'hébergement de la page est public.
 
 ## Créer et partager
 
@@ -26,6 +39,6 @@ Après avoir intégré ces fichiers à `main`, active **Settings → Pages → B
 4. Copie le lien et envoie-le à la personne qui recevra le calendrier.
 5. En ouvrant ce lien, cette personne découvre les cases en lecture seule. Du 1er au 24 décembre, chaque case reste verrouillée jusqu'à son jour; les cases déjà ouvertes restent accessibles et peuvent être revues. En dehors de décembre, seules les cases déjà ouvertes restent accessibles. La progression est mémorisée dans le navigateur du lecteur.
 
-Les brouillons du créateur sont enregistrés dans le stockage local du navigateur. Les images sont intégrées au lien (les photos sont réduites pour limiter sa taille). Le lien n'est pas un identifiant hébergé : il embarque une copie des surprises. Toute personne qui le possède peut consulter cette copie ; aucune modification faite par un lecteur ne peut être renvoyée au créateur. La page doit être publiée sur un hébergement web public pour que le lien soit accessible à d'autres personnes. L'application refuse de fabriquer un faux lien depuis `file://`, `localhost` ou une adresse IP privée; publie d'abord le dossier, puis crée le lien depuis l'adresse publique du site.
+Sans compte configuré, le brouillon du créateur reste enregistré dans le stockage local du navigateur. Avec un compte Supabase, le même calendrier unique est sauvegardé en ligne et récupéré lors des connexions suivantes. Les images sont intégrées au lien (les photos sont réduites pour limiter sa taille). Le lien n'est pas un identifiant hébergé : il embarque une copie des surprises. Toute personne qui le possède peut consulter cette copie ; aucune modification faite par un lecteur ne peut être renvoyée au créateur. La page doit être publiée sur un hébergement web public pour que le lien soit accessible à d'autres personnes. L'application refuse de fabriquer un faux lien depuis `file://`, `localhost` ou une adresse IP privée; publie d'abord le dossier, puis crée le lien depuis l'adresse publique du site.
 
 Les données du calendrier dans le lien sont compressées avec gzip dans les navigateurs récents. La page ne transmet ni ne stocke les données sur un serveur.
